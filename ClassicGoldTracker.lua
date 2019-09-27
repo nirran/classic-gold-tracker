@@ -19,6 +19,7 @@ f:EnableMouse(true)
 f:RegisterForDrag("LeftButton")
 f:SetScript("OnDragStart", f.StartMoving)
 f:SetScript("OnDragStop", f.StopMovingOrSizing)
+
 f.text = f:CreateFontString(nil, "ARTWORK") --Create a FontString to display text
 f.text:SetFont("Fonts\\FRIZQT__.TTF", 12) --Set the font and size
 f.text:SetTextColor(1, 1, 1) --Set the text colour
@@ -29,68 +30,52 @@ frame:SetScript(
     function(self, event, arg1, ...)
         if (event == "VARIABLES_LOADED") then
             if SAVES == nil then
-                --print("got no saves")
+                -- No Saves for this character found
                 SAVES = {}
-            else
-                --print("got saves")
             end
         end
 
-        if (event == "PLAYER_ENTERING_WORLD") then
-            local copper = GetMoney()
-            if SAVES == nil then
-                PLAYER_MONEY_START = copper
-            else
-                if (SAVES[CURRENT_DATE] == nil) then
-                    PLAYER_MONEY_START = copper
-                else
-                    PLAYER_MONEY_START = SAVES[CURRENT_DATE]
-                end
-            end
-
-            SAVES[CURRENT_DATE] = PLAYER_MONEY_START
-
-            PLAYER_MONEY_CURRENT = PLAYER_MONEY_START
-
-            local tmpMoney = GetMoney()
-
-            local overallDiff = tmpMoney - PLAYER_MONEY_START
-
-            local overallDiffString = ""
-            if overallDiff > 0 then
-                overallDiffString = "(Total Today +" .. GetCoinTextureString(overallDiff) .. ")"
-            else
-                overallDiffString = "(Total Today -" .. GetCoinTextureString(math.abs(overallDiff)) .. ")"
-            end
-            if overallDiff == 0 then
-                overallDiffString = "(Total Today " .. GetCoinTextureString(math.abs(overallDiff)) .. ")"
-            end
-
-            local output = "Your Money: " .. GetCoinTextureString(PLAYER_MONEY_CURRENT) .. " " .. overallDiffString
-            f.text:SetText(overallDiffString)
-            print(output)
-        --RaidNotice_AddMessage(RaidBossEmoteFrame, output, ChatTypeInfo["RAID_BOSS_EMOTE"])
-        end
-
-        if (event == "PLAYER_MONEY") then
-            local tmpMoney = GetMoney()
-
-            local overallDiff = tmpMoney - PLAYER_MONEY_START
-
-            local overallDiffString = ""
-            if overallDiff > 0 then
-                overallDiffString = "(Total Today +" .. GetCoinTextureString(overallDiff) .. ")"
-            else
-                overallDiffString = "(Total Today -" .. GetCoinTextureString(math.abs(overallDiff)) .. ")"
-            end
-
-            if overallDiff == 0 then
-                overallDiffString = "(Total Today " .. GetCoinTextureString(math.abs(overallDiff)) .. ")"
-            end
-
-            PLAYER_MONEY_CURRENT = tmpMoney
-
-            f.text:SetText(overallDiffString)
+        if (event == "PLAYER_ENTERING_WORLD") or (event == "PLAYER_MONEY") then
+            updateMoneyOnScreen(event)
         end
     end
 )
+
+function updateMoneyOnScreen(event)
+    local copper = GetMoney()
+
+    if SAVES == nil then
+        PLAYER_MONEY_START = copper
+    else
+        if (SAVES[CURRENT_DATE] == nil) then
+            PLAYER_MONEY_START = copper
+        else
+            PLAYER_MONEY_START = SAVES[CURRENT_DATE]
+        end
+    end
+
+    SAVES[CURRENT_DATE] = PLAYER_MONEY_START
+
+    PLAYER_MONEY_CURRENT = PLAYER_MONEY_START
+
+    local tmpMoney = GetMoney()
+
+    local overallDiff = tmpMoney - PLAYER_MONEY_START
+
+    local overallDiffString = ""
+    if overallDiff > 0 then
+        overallDiffString = "Total Today: +" .. GetCoinTextureString(overallDiff)
+    else
+        overallDiffString = "Total Today: -" .. GetCoinTextureString(math.abs(overallDiff))
+    end
+    if overallDiff == 0 then
+        overallDiffString = "Total Today: " .. GetCoinTextureString(math.abs(overallDiff))
+    end
+
+    f.text:SetText(overallDiffString)
+
+    if (event == "PLAYER_ENTERING_WORLD") then
+        local output = "Your Money: " .. GetCoinTextureString(PLAYER_MONEY_CURRENT) .. " " .. overallDiffString
+        print(output)
+    end
+end
