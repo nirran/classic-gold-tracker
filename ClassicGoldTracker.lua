@@ -31,7 +31,7 @@ local b = CreateFrame("Button", "MyButton", f, nil)
 b:SetNormalTexture("Interface\\MINIMAP\\TRACKING\\None")
 
 b:SetSize(20, 20) -- width, height
-b:SetPoint("LEFT", -25, 0)
+b:SetPoint("RIGHT", 0, 0)
 
 local HistoryFrame = CreateFrame("frame", "HistoryFrameFrame", UIParent)
 
@@ -91,6 +91,8 @@ b:SetScript(
             end
             table.sort(SavesSorted)
 
+            dateSort(SavesSorted)
+
             table.foreach(
                 SavesSorted,
                 function(k, v)
@@ -113,7 +115,8 @@ b:SetScript(
                     local money = HistoryFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
                     money:SetPoint("TOPRIGHT", -30, offset)
                     money:SetFont("Fonts\\FRIZQT__.TTF", 10)
-                    money:SetText(GetCoinTextureString(v))
+
+                    money:SetText(GetCoinTextureString(SAVES[SavesSorted[k]]))
                 end
             )
         else
@@ -139,6 +142,39 @@ frame:SetScript(
     end
 )
 
+function dateSort(dateTable)
+    local i = 1
+    local changed = false
+
+    table.foreach(
+        dateTable,
+        function(k, v)
+            local day = string.sub(dateTable[k], 0, 2)
+            local month = string.sub(dateTable[k], 3, 4)
+            local year = string.sub(dateTable[k], 5, 6)
+
+            if (i < table.getn(dateTable)) then
+                local nextDay = string.sub(dateTable[k + 1], 0, 2)
+                local nextMonth = string.sub(dateTable[k + 1], 3, 4)
+                local nextYear = string.sub(dateTable[k + 1], 5, 6)
+
+                if (day >= nextDay and month == nextMonth or month > nextMonth) then
+                    changed = true
+                    print(day .. ">= " .. nextDay .. " and " .. month .. " > " .. nextMonth)
+                    local temp = dateTable[k]
+                    dateTable[k] = dateTable[i + 1]
+                    dateTable[i + 1] = temp
+                end
+            end
+
+            i = i + 1
+        end
+    )
+
+    if (changed) then
+        dateSort(dateTable)
+    end
+end
 function updateMoneyOnScreen(event)
     local copper = GetMoney()
 
