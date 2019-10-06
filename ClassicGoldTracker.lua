@@ -2,6 +2,8 @@ local frame = CreateFrame("FRAME", "SimpleGoldTrackerFrame")
 local PLAYER_MONEY_START = 0
 local PLAYER_MONEY_CURRENT = 0
 local CURRENT_DATE = date("%d%m%y")
+local AceGUI = LibStub("AceGUI-3.0")
+local historyIsOpen = false
 
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 frame:RegisterEvent("PLAYER_MONEY")
@@ -24,6 +26,102 @@ f.text = f:CreateFontString(nil, "ARTWORK") --Create a FontString to display tex
 f.text:SetFont("Fonts\\FRIZQT__.TTF", 12) --Set the font and size
 f.text:SetTextColor(1, 1, 1) --Set the text colour
 f.text:SetAllPoints() --Put it in the centre of the frame
+
+local b = CreateFrame("Button", "MyButton", f, nil)
+b:SetNormalTexture("Interface\\MINIMAP\\TRACKING\\None")
+
+b:SetSize(20, 20) -- width, height
+b:SetPoint("LEFT", -25, 0)
+
+local HistoryFrame = CreateFrame("frame", "HistoryFrameFrame", UIParent)
+
+HistoryFrame:SetBackdrop(
+    {
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = 1,
+        tileSize = 32,
+        edgeSize = 32,
+        insets = {left = 11, right = 12, top = 12, bottom = 11}
+    }
+)
+HistoryFrame:SetWidth(500)
+HistoryFrame:SetHeight(400)
+HistoryFrame:SetPoint("CENTER", UIParent)
+HistoryFrame:EnableMouse(true)
+HistoryFrame:EnableMouseWheel(true)
+HistoryFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+HistoryFrame:SetMovable(true)
+HistoryFrame:RegisterForDrag("LeftButton")
+HistoryFrame:SetScript("OnDragStart", frame.StartMoving)
+HistoryFrame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+HistoryFrameFrame:Hide()
+
+HistoryFrame.text = HistoryFrame:CreateFontString(nil, "ARTWORK") --Create a FontString to display text
+HistoryFrame.text:SetFont("Fonts\\FRIZQT__.TTF", 14) --Set the font and size
+HistoryFrame:SetBackdropColor(0, 0, 0, 0.9)
+HistoryFrame.text:SetTextColor(1, 1, 1) --Set the text colour
+HistoryFrame.text:SetPoint("CENTER", 0, 170) --Put it in the centre of the frame
+HistoryFrame.text:SetText("Classic Gold Tracker - History")
+
+local CloseButton = CreateFrame("button", "HistoryFrameButton", HistoryFrame, "UIPanelButtonTemplate")
+CloseButton:SetHeight(25)
+CloseButton:SetWidth(25)
+CloseButton:SetPoint("TOPRIGHT", 0, 0)
+CloseButton:SetText("x")
+CloseButton:SetScript(
+    "OnClick",
+    function(self)
+        self:GetParent():Hide()
+    end
+)
+
+b:SetScript(
+    "OnClick",
+    function()
+        if (historyIsOpen == false) then
+            historyIsOpen = true
+            HistoryFrameFrame:Show()
+            local offset = -40
+
+            local SavesSorted = {}
+
+            for k in pairs(SAVES) do
+                table.insert(SavesSorted, k)
+            end
+            table.sort(SavesSorted)
+
+            table.foreach(
+                SavesSorted,
+                function(k, v)
+                    offset = offset - 20
+
+                    local dateString = HistoryFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                    dateString:SetPoint("TOPLEFT", 30, offset)
+                    dateString:SetText("Hello World!")
+
+                    local day = string.sub(SavesSorted[k], 0, 2)
+                    local month = string.sub(SavesSorted[k], 3, 4)
+                    local year = string.sub(SavesSorted[k], 5, 6)
+                    dateString:SetText(day .. "." .. month .. "." .. year)
+                    dateString:SetFont("Fonts\\FRIZQT__.TTF", 10)
+
+                    local money = AceGUI:Create("Label")
+                    money:SetText()
+                    money:SetFont("Fonts\\FRIZQT__.TTF", 12)
+
+                    local money = HistoryFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                    money:SetPoint("TOPRIGHT", -30, offset)
+                    money:SetFont("Fonts\\FRIZQT__.TTF", 10)
+                    money:SetText(GetCoinTextureString(v))
+                end
+            )
+        else
+            historyIsOpen = false
+            HistoryFrameFrame:Hide()
+        end
+    end
+)
 
 frame:SetScript(
     "OnEvent",
