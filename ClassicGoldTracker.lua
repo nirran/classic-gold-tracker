@@ -31,7 +31,7 @@ local b = CreateFrame("Button", "MyButton", f, nil)
 b:SetNormalTexture("Interface\\MINIMAP\\TRACKING\\None")
 
 b:SetSize(20, 20) -- width, height
-b:SetPoint("RIGHT", 0, 0)
+b:SetPoint("RIGHT", 15, 0)
 
 local HistoryFrame = CreateFrame("frame", "HistoryFrameFrame", UIParent)
 
@@ -160,7 +160,7 @@ function dateSort(dateTable)
 
                 if (day >= nextDay and month == nextMonth or month > nextMonth) then
                     changed = true
-                    print(day .. ">= " .. nextDay .. " and " .. month .. " > " .. nextMonth)
+                    --print(day .. ">= " .. nextDay .. " and " .. month .. " > " .. nextMonth)
                     local temp = dateTable[k]
                     dateTable[k] = dateTable[i + 1]
                     dateTable[i + 1] = temp
