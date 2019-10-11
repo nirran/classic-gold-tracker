@@ -33,7 +33,7 @@ b:SetNormalTexture("Interface\\MINIMAP\\TRACKING\\None")
 b:SetSize(20, 20) -- width, height
 b:SetPoint("RIGHT", 15, 0)
 
-local HistoryFrame = CreateFrame("frame", "HistoryFrameFrame", UIParent)
+local HistoryFrame = CreateFrame("ScrollFrame", "HistoryFrameFrame", UIParent)
 
 HistoryFrame:SetBackdrop(
     {
@@ -63,6 +63,46 @@ HistoryFrame:SetBackdropColor(0, 0, 0, 0.9)
 HistoryFrame.text:SetTextColor(1, 1, 1) --Set the text colour
 HistoryFrame.text:SetPoint("CENTER", 0, 170) --Put it in the centre of the frame
 HistoryFrame.text:SetText("Classic Gold Tracker - History")
+
+--scrollframe
+scrollframe = CreateFrame("ScrollFrame", nil, HistoryFrame)
+scrollframe:SetPoint("TOPLEFT", 10, -10)
+scrollframe:SetPoint("BOTTOMRIGHT", -10, 10)
+local texture = scrollframe:CreateTexture()
+texture:SetAllPoints()
+texture:SetTexture(.5, .5, .5, 1)
+HistoryFrame.scrollframe = scrollframe
+
+--scrollbar
+scrollbar = CreateFrame("Slider", nil, scrollframe, "UIPanelScrollBarTemplate")
+scrollbar:SetPoint("TOPLEFT", HistoryFrame, "TOPRIGHT", 4, -16)
+scrollbar:SetPoint("BOTTOMLEFT", HistoryFrame, "BOTTOMRIGHT", 4, 16)
+scrollbar:SetMinMaxValues(1, 200)
+scrollbar:SetValueStep(1)
+scrollbar.scrollStep = 1
+scrollbar:SetValue(0)
+scrollbar:SetWidth(16)
+scrollbar:SetScript(
+    "OnValueChanged",
+    function(self, value)
+        self:GetParent():SetVerticalScroll(value)
+    end
+)
+local scrollbg = scrollbar:CreateTexture(nil, "BACKGROUND")
+scrollbg:SetAllPoints(scrollbar)
+scrollbg:SetTexture(0, 0, 0, 0.4)
+HistoryFrame.scrollbar = scrollbar
+
+--content frame
+local content = CreateFrame("Frame", nil, scrollframe)
+content:SetSize(128, 128)
+local texture = content:CreateTexture()
+texture:SetAllPoints()
+--texture:SetTexture("Interface\\GLUES\\MainMenu\\Glues-BlizzardLogo")
+content.texture = texture
+scrollframe.content = content
+
+scrollframe:SetScrollChild(content)
 
 local CloseButton = CreateFrame("button", "HistoryFrameButton", HistoryFrame, "UIPanelButtonTemplate")
 CloseButton:SetHeight(25)
@@ -98,7 +138,7 @@ b:SetScript(
                 function(k, v)
                     offset = offset - 20
 
-                    local dateString = HistoryFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                    local dateString = content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
                     dateString:SetPoint("TOPLEFT", 30, offset)
                     dateString:SetText("Hello World!")
 
@@ -112,8 +152,8 @@ b:SetScript(
                     money:SetText()
                     money:SetFont("Fonts\\FRIZQT__.TTF", 12)
 
-                    local money = HistoryFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                    money:SetPoint("TOPRIGHT", -30, offset)
+                    local money = content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                    money:SetPoint("TOPRIGHT", content, 320, offset)
                     money:SetFont("Fonts\\FRIZQT__.TTF", 10)
 
                     money:SetText(GetCoinTextureString(SAVES[SavesSorted[k]]))
