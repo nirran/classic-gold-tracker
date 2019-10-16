@@ -5,6 +5,7 @@ local CURRENT_DATE = date("%d%m%y")
 local CURRENT_PAGE = 1
 local SavesSorted = {}
 local content
+local SavesSortedSize, SavesSortedSizeFinal
 
 function CGT_OnLoad(self)
     SetPortraitToTexture(self.portrait, "Interface\\ICONS\\INV_Misc_Book_12")
@@ -122,7 +123,8 @@ function loadHistory()
 
     dateSort(SavesSorted)
 
-    local SavesSortedSize = table.getn(SavesSorted)
+    SavesSortedSizeFinal = table.getn(SavesSorted)
+    SavesSortedSize = table.getn(SavesSorted)
 
     TOTAL_PAGE_SIZE = 0
     repeat
@@ -187,12 +189,24 @@ function showPage(number)
     texture:SetAllPoints()
 
     CURRENT_PAGE = number
-    local offset = 0
+    local offset = -5
 
     local END = ((15 - (CURRENT_PAGE * 15)) * -1) + 15
     if (((15 - (CURRENT_PAGE * 15)) * -1) + 16 >= table.getn(SavesSorted)) then
         END = table.getn(SavesSorted)
     end
+
+    local dateHeader = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    dateHeader:SetPoint("TOPLEFT", History, 7, -5)
+    dateHeader:SetText("Date")
+
+    local PercentHeader = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    PercentHeader:SetPoint("TOP", History, -5, -5)
+    PercentHeader:SetText("Change %")
+
+    local GoldHeader = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    GoldHeader:SetPoint("TOPRIGHT", History, -15, -5)
+    GoldHeader:SetText("Gold Amount")
 
     --print("END is " .. END .. "(" .. table.getn(SavesSorted) .. ")")
     for k = ((15 - (CURRENT_PAGE * 15)) * -1) + 1, END, 1 do
@@ -215,6 +229,44 @@ function showPage(number)
         money:SetFont("Fonts\\FRIZQT__.TTF", 10)
 
         money:SetText(GetCoinTextureString(SAVES[SavesSorted[k]]))
+
+        if (k < SavesSortedSizeFinal) then
+            local diffInPercent = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            diffInPercent:SetPoint("TOP", History, -10, offset)
+            diffInPercent:SetFont("Fonts\\FRIZQT__.TTF", 10)
+
+            local diff = SAVES[SavesSorted[k]] - SAVES[SavesSorted[k + 1]]
+            local isNegative = false
+            if (diff < 0) then
+                isNegative = true
+                diff = diff * -1
+            end
+
+            local diffPercent = diff / SAVES[SavesSorted[k + 1]] * 100
+
+            if (isNegative) then
+                if (diffPercent <= 25) then
+                    diffInPercent:SetTextColor(1, 1, 0, 1)
+                else
+                    diffInPercent:SetTextColor(1, 0, 0, 1)
+                end
+
+                diffInPercent:SetText("-" .. math.floor(diffPercent) .. "%")
+            else
+                diffInPercent:SetText("+" .. math.floor(diffPercent) .. "%")
+
+                if (diffPercent <= 25) then
+                    diffInPercent:SetTextColor(0, 1, 0, 0.5)
+                else
+                    diffInPercent:SetTextColor(0, 1, 0, 1)
+                end
+            end
+        else
+            local diffInPercent = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            diffInPercent:SetPoint("TOP", History, -10, offset)
+            diffInPercent:SetFont("Fonts\\FRIZQT__.TTF", 10)
+            diffInPercent:SetText("--")
+        end
     end
 end
 
