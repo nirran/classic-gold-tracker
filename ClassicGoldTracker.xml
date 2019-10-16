@@ -96,6 +96,68 @@ http://wowprogramming.com/FrameXML/UI.xsd">
 
         <Frames>
 
+            <Frame name="Options" parent="Main">
+                <Size x="300" y="325"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="Main">
+                        <Offset x="-115" y="-75"/>
+                    </Anchor>
+                </Anchors>
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <FontString name="Options_Title" inherits="GameFontNormal" text="Options">
+                            <Color r="1" g="1" b="1" a="1"/>
+                            <Anchors>
+                                <Anchor point="TOP">
+                                    <Offset x="-60" y="20"/>
+                                </Anchor>
+                            </Anchors>
+
+
+                        </FontString>
+
+                        <FontString name="Options_Title2" inherits="GameFontNormal" text="Background in Live Tracker">
+                            <Color r="1" g="1" b="1" a="1"/>
+                            <Anchors>
+                                <Anchor point="TOP">
+                                    <Offset x="-60" y="-20"/>
+                                </Anchor>
+                            </Anchors>
+
+
+                        </FontString>
+
+
+
+
+
+                    </Layer>
+                </Layers>
+                <Scripts>
+                    <OnLoad>
+                    self:Hide()
+                    </OnLoad>
+                </Scripts>
+
+                <Frames>
+                    <CheckButton name="backgroundCheckOption" inherits="UICheckButtonTemplate" text="CheckButton1" checked="true">
+                        <Anchors>
+                            <Anchor point="TOPRIGHT">
+                                <Offset x="-10" y="-10" />
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnClick>
+                            toggleBackgroundOption()
+                            </OnClick>
+                        </Scripts>
+                    </CheckButton>
+                </Frames>
+
+            </Frame>
+
+
+
             <Frame name="History" parent="Main">
                 <Size x="300" y="325"/>
                 <Anchors>
@@ -206,6 +268,8 @@ http://wowprogramming.com/FrameXML/UI.xsd">
                     </OnClick>
                 </Scripts>
             </Button>
+
+
         </Frames>
 
 

@@ -24,6 +24,20 @@ function CGT_OnLoad(self)
                     -- No Saves for this character found
                     SAVES = {}
                 end
+
+                if MYOPTIONS == nil then
+                    -- No Saves for this character found
+                    MYOPTIONS = {}
+                    backgroundCheckOption:SetChecked(true)
+                else
+                    backgroundCheckOption:SetChecked(MYOPTIONS["backgroundLive"])
+                end
+
+                if (backgroundCheckOption:GetChecked() == true) then
+                    GoldStat:EnableDrawLayer("BORDER")
+                else
+                    GoldStat:DisableDrawLayer("BORDER")
+                end
             end
 
             if (event == "PLAYER_ENTERING_WORLD") or (event == "PLAYER_MONEY") then
@@ -91,6 +105,8 @@ function showOptions()
     previousButton:Hide()
     nextButton:Hide()
     saveButton:Show()
+
+    Options:Show()
 end
 
 function showHistory()
@@ -100,6 +116,7 @@ function showHistory()
     previousButton:Show()
     nextButton:Show()
     saveButton:Hide()
+    Options:Hide()
 end
 
 function closeMainFrame()
@@ -228,7 +245,13 @@ function showPage(number)
         money:SetPoint("TOPRIGHT", History, -10, offset)
         money:SetFont("Fonts\\FRIZQT__.TTF", 10)
 
-        money:SetText(GetCoinTextureString(SAVES[SavesSorted[k]]))
+        if (CURRENT_DATE == day .. month .. year) then
+            money:SetText(GetCoinTextureString(GetMoney()))
+            SAVES[SavesSorted[k]] = GetMoney()
+            SAVES[CURRENT_DATE] = GetMoney()
+        else
+            money:SetText(GetCoinTextureString(SAVES[SavesSorted[k]]))
+        end
 
         if (k < SavesSortedSizeFinal) then
             local diffInPercent = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -302,4 +325,15 @@ function dateSort(dateTable)
     if (changed) then
         dateSort(dateTable)
     end
+end
+
+function toggleBackgroundOption()
+    print(backgroundCheckOption:GetChecked())
+    if (backgroundCheckOption:GetChecked() == true) then
+        GoldStat:EnableDrawLayer("BORDER")
+    else
+        GoldStat:DisableDrawLayer("BORDER")
+    end
+
+    MYOPTIONS["backgroundLive"] = backgroundCheckOption:GetChecked()
 end
