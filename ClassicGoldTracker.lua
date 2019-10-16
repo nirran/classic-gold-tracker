@@ -48,7 +48,7 @@ function CGT_OnLoad(self)
 end
 
 function updateMoneyOnScreen(event)
-    print("updateMoneyOnScreen")
+    --print("updateMoneyOnScreen")
     local copper = GetMoney()
 
     if SAVES == nil then
@@ -328,7 +328,7 @@ function dateSort(dateTable)
 end
 
 function toggleBackgroundOption()
-    print(backgroundCheckOption:GetChecked())
+    -- print(backgroundCheckOption:GetChecked())
     if (backgroundCheckOption:GetChecked() == true) then
         GoldStat:EnableDrawLayer("BORDER")
     else
