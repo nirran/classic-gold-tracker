@@ -1,221 +1,39 @@
-local frame = CreateFrame("FRAME", "SimpleGoldTrackerFrame")
+local optionsShown = false
 local PLAYER_MONEY_START = 0
 local PLAYER_MONEY_CURRENT = 0
 local CURRENT_DATE = date("%d%m%y")
-local AceGUI = LibStub("AceGUI-3.0")
-local historyIsOpen = false
+local CURRENT_PAGE = 1
+local SavesSorted = {}
+local content
 
-frame:RegisterEvent("PLAYER_ENTERING_WORLD")
-frame:RegisterEvent("PLAYER_MONEY")
-frame:RegisterEvent("VARIABLES_LOADED")
+function CGT_OnLoad(self)
+    SetPortraitToTexture(self.portrait, "Interface\\ICONS\\INV_Misc_Book_12")
+    History_Title:SetText("Gold History")
+    MakeMovable(self)
 
-local f = CreateFrame("Frame", "ProfitCraftablesFrame", UIParent) --Create a frame
-f:SetFrameStrata("BACKGROUND") --Set its strata
-f:SetHeight(50) --Give it height
-f:SetWidth(200) --and width
+    GoldStat:RegisterEvent("PLAYER_ENTERING_WORLD")
+    GoldStat:RegisterEvent("PLAYER_MONEY")
+    GoldStat:RegisterEvent("VARIABLES_LOADED")
 
-f:SetBackdropColor(0, 0, 0, 0.3) --Set the background colour to black
-f:SetPoint("CENTER") --Put it in the centre of the parent frame (UIParent)
-f:SetMovable(true)
-f:EnableMouse(true)
-f:RegisterForDrag("LeftButton")
-f:SetScript("OnDragStart", f.StartMoving)
-f:SetScript("OnDragStop", f.StopMovingOrSizing)
-
-f.text = f:CreateFontString(nil, "ARTWORK") --Create a FontString to display text
-f.text:SetFont("Fonts\\FRIZQT__.TTF", 12) --Set the font and size
-f.text:SetTextColor(1, 1, 1) --Set the text colour
-f.text:SetAllPoints() --Put it in the centre of the frame
-
-local b = CreateFrame("Button", "MyButton", f, nil)
-b:SetNormalTexture("Interface\\MINIMAP\\TRACKING\\None")
-
-b:SetSize(20, 20) -- width, height
-b:SetPoint("RIGHT", 15, 0)
-
-local HistoryFrame = CreateFrame("ScrollFrame", "HistoryFrameFrame", UIParent)
-
-HistoryFrame:SetBackdrop(
-    {
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = 1,
-        tileSize = 32,
-        edgeSize = 32,
-        insets = {left = 11, right = 12, top = 12, bottom = 11}
-    }
-)
-HistoryFrame:SetWidth(500)
-HistoryFrame:SetHeight(400)
-HistoryFrame:SetPoint("CENTER", UIParent)
-HistoryFrame:EnableMouse(true)
-HistoryFrame:EnableMouseWheel(true)
-HistoryFrame:SetFrameStrata("FULLSCREEN_DIALOG")
-HistoryFrame:SetMovable(true)
-HistoryFrame:RegisterForDrag("LeftButton")
-HistoryFrame:SetScript("OnDragStart", frame.StartMoving)
-HistoryFrame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-HistoryFrameFrame:Hide()
-
-HistoryFrame.text = HistoryFrame:CreateFontString(nil, "ARTWORK") --Create a FontString to display text
-HistoryFrame.text:SetFont("Fonts\\FRIZQT__.TTF", 14) --Set the font and size
-HistoryFrame:SetBackdropColor(0, 0, 0, 0.9)
-HistoryFrame.text:SetTextColor(1, 1, 1) --Set the text colour
-HistoryFrame.text:SetPoint("CENTER", 0, 170) --Put it in the centre of the frame
-HistoryFrame.text:SetText("Classic Gold Tracker - History")
-
---scrollframe
-scrollframe = CreateFrame("ScrollFrame", nil, HistoryFrame)
-scrollframe:SetPoint("TOPLEFT", 10, -10)
-scrollframe:SetPoint("BOTTOMRIGHT", -10, 10)
-local texture = scrollframe:CreateTexture()
-texture:SetAllPoints()
-texture:SetTexture(.5, .5, .5, 1)
-HistoryFrame.scrollframe = scrollframe
-
---scrollbar
-scrollbar = CreateFrame("Slider", nil, scrollframe, "UIPanelScrollBarTemplate")
-scrollbar:SetPoint("TOPLEFT", HistoryFrame, "TOPRIGHT", 4, -16)
-scrollbar:SetPoint("BOTTOMLEFT", HistoryFrame, "BOTTOMRIGHT", 4, 16)
-scrollbar:SetMinMaxValues(1, 200)
-scrollbar:SetValueStep(1)
-scrollbar.scrollStep = 1
-scrollbar:SetValue(0)
-scrollbar:SetWidth(16)
-scrollbar:SetScript(
-    "OnValueChanged",
-    function(self, value)
-        self:GetParent():SetVerticalScroll(value)
-    end
-)
-local scrollbg = scrollbar:CreateTexture(nil, "BACKGROUND")
-scrollbg:SetAllPoints(scrollbar)
-scrollbg:SetTexture(0, 0, 0, 0.4)
-HistoryFrame.scrollbar = scrollbar
-
---content frame
-local content = CreateFrame("Frame", nil, scrollframe)
-content:SetSize(128, 128)
-local texture = content:CreateTexture()
-texture:SetAllPoints()
---texture:SetTexture("Interface\\GLUES\\MainMenu\\Glues-BlizzardLogo")
-content.texture = texture
-scrollframe.content = content
-
-scrollframe:SetScrollChild(content)
-
-local CloseButton = CreateFrame("button", "HistoryFrameButton", HistoryFrame, "UIPanelButtonTemplate")
-CloseButton:SetHeight(25)
-CloseButton:SetWidth(25)
-CloseButton:SetPoint("TOPRIGHT", 0, 0)
-CloseButton:SetText("x")
-CloseButton:SetScript(
-    "OnClick",
-    function(self)
-        self:GetParent():Hide()
-    end
-)
-
-b:SetScript(
-    "OnClick",
-    function()
-        if (historyIsOpen == false) then
-            historyIsOpen = true
-            HistoryFrameFrame:Show()
-            local offset = -40
-
-            local SavesSorted = {}
-
-            for k in pairs(SAVES) do
-                table.insert(SavesSorted, k)
-            end
-            table.sort(SavesSorted)
-
-            dateSort(SavesSorted)
-
-            table.foreach(
-                SavesSorted,
-                function(k, v)
-                    offset = offset - 20
-
-                    local dateString = content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                    dateString:SetPoint("TOPLEFT", 30, offset)
-                    dateString:SetText("Hello World!")
-
-                    local day = string.sub(SavesSorted[k], 0, 2)
-                    local month = string.sub(SavesSorted[k], 3, 4)
-                    local year = string.sub(SavesSorted[k], 5, 6)
-                    dateString:SetText(day .. "." .. month .. "." .. year)
-                    dateString:SetFont("Fonts\\FRIZQT__.TTF", 10)
-
-                    local money = AceGUI:Create("Label")
-                    money:SetText()
-                    money:SetFont("Fonts\\FRIZQT__.TTF", 12)
-
-                    local money = content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                    money:SetPoint("TOPRIGHT", content, 320, offset)
-                    money:SetFont("Fonts\\FRIZQT__.TTF", 10)
-
-                    money:SetText(GetCoinTextureString(SAVES[SavesSorted[k]]))
-                end
-            )
-        else
-            historyIsOpen = false
-            HistoryFrameFrame:Hide()
-        end
-    end
-)
-
-frame:SetScript(
-    "OnEvent",
-    function(self, event, arg1, ...)
-        if (event == "VARIABLES_LOADED") then
-            if SAVES == nil then
-                -- No Saves for this character found
-                SAVES = {}
-            end
-        end
-
-        if (event == "PLAYER_ENTERING_WORLD") or (event == "PLAYER_MONEY") then
-            updateMoneyOnScreen(event)
-        end
-    end
-)
-
-function dateSort(dateTable)
-    local i = 1
-    local changed = false
-
-    table.foreach(
-        dateTable,
-        function(k, v)
-            local day = string.sub(dateTable[k], 0, 2)
-            local month = string.sub(dateTable[k], 3, 4)
-            local year = string.sub(dateTable[k], 5, 6)
-
-            if (i < table.getn(dateTable)) then
-                local nextDay = string.sub(dateTable[k + 1], 0, 2)
-                local nextMonth = string.sub(dateTable[k + 1], 3, 4)
-                local nextYear = string.sub(dateTable[k + 1], 5, 6)
-
-                if (day >= nextDay and month == nextMonth or month > nextMonth) then
-                    changed = true
-                    --print(day .. ">= " .. nextDay .. " and " .. month .. " > " .. nextMonth)
-                    local temp = dateTable[k]
-                    dateTable[k] = dateTable[i + 1]
-                    dateTable[i + 1] = temp
+    GoldStat:SetScript(
+        "OnEvent",
+        function(self, event, ...)
+            if (event == "VARIABLES_LOADED") then
+                if SAVES == nil then
+                    -- No Saves for this character found
+                    SAVES = {}
                 end
             end
 
-            i = i + 1
+            if (event == "PLAYER_ENTERING_WORLD") or (event == "PLAYER_MONEY") then
+                updateMoneyOnScreen(event)
+            end
         end
     )
-
-    if (changed) then
-        dateSort(dateTable)
-    end
 end
+
 function updateMoneyOnScreen(event)
+    print("updateMoneyOnScreen")
     local copper = GetMoney()
 
     if SAVES == nil then
@@ -238,18 +56,198 @@ function updateMoneyOnScreen(event)
 
     local overallDiffString = ""
     if overallDiff > 0 then
-        overallDiffString = "Total Today: +" .. GetCoinTextureString(overallDiff)
+        overallDiffString = "+" .. GetCoinTextureString(overallDiff)
     else
-        overallDiffString = "Total Today: -" .. GetCoinTextureString(math.abs(overallDiff))
+        overallDiffString = "-" .. GetCoinTextureString(math.abs(overallDiff))
     end
     if overallDiff == 0 then
-        overallDiffString = "Total Today: " .. GetCoinTextureString(math.abs(overallDiff))
+        overallDiffString = "" .. GetCoinTextureString(math.abs(overallDiff))
     end
 
-    f.text:SetText(overallDiffString)
+    liveGold:SetText(overallDiffString)
 
     if (event == "PLAYER_ENTERING_WORLD") then
-        local output = "Your Money: " .. GetCoinTextureString(PLAYER_MONEY_CURRENT) .. " " .. overallDiffString
-        print(output)
+        local output = "Your Money: " .. GetCoinTextureString(PLAYER_MONEY_CURRENT) .. " (" .. overallDiffString .. ")"
+    end
+end
+
+function MakeMovable(frame)
+    frame:SetMovable(true)
+    frame:RegisterForDrag("LeftButton")
+    frame:SetScript("OnDragStart", frame.StartMoving)
+    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+end
+
+function showOptions()
+    content:Hide()
+    content:SetParent(nil)
+    content:UnregisterAllEvents()
+    content:SetID(0)
+    content:ClearAllPoints()
+    optionsShown = true
+    History_Title:SetText("Options")
+    History:Hide()
+    previousButton:Hide()
+    nextButton:Hide()
+    saveButton:Show()
+end
+
+function showHistory()
+    History_Title:SetText("Gold History")
+    History:Show()
+    optionsShown = false
+    previousButton:Show()
+    nextButton:Show()
+    saveButton:Hide()
+end
+
+function closeMainFrame()
+    content:Hide()
+    content:SetParent(nil)
+    content:UnregisterAllEvents()
+    content:SetID(0)
+    content:ClearAllPoints()
+    History_Title:SetText("Gold History")
+    Main:Hide()
+    showHistory()
+end
+
+function loadHistory()
+    SavesSorted = {}
+
+    for k in pairs(SAVES) do
+        table.insert(SavesSorted, k)
+    end
+    table.sort(SavesSorted)
+
+    dateSort(SavesSorted)
+
+    local SavesSortedSize = table.getn(SavesSorted)
+
+    TOTAL_PAGE_SIZE = 0
+    repeat
+        TOTAL_PAGE_SIZE = TOTAL_PAGE_SIZE + 1
+        SavesSortedSize = SavesSortedSize - 15
+    until (SavesSortedSize <= 0)
+
+    if (CURRENT_PAGE > 1) then
+        previousButton:Enable()
+    else
+        previousButton:Disable()
+    end
+
+    History_Pagination:SetText(CURRENT_PAGE .. "/" .. TOTAL_PAGE_SIZE)
+    showPage(CURRENT_PAGE)
+end
+
+function nextPage()
+    if (CURRENT_PAGE + 1 <= TOTAL_PAGE_SIZE) then
+        content:Hide()
+        content:SetParent(nil)
+        content:UnregisterAllEvents()
+        content:SetID(0)
+        content:ClearAllPoints()
+        CURRENT_PAGE = CURRENT_PAGE + 1
+        History_Pagination:SetText(CURRENT_PAGE .. "/" .. TOTAL_PAGE_SIZE)
+
+        showPage(CURRENT_PAGE)
+    end
+end
+
+function previousPage()
+    if (CURRENT_PAGE - 1 >= 1) then
+        content:Hide()
+        content:SetParent(nil)
+        content:UnregisterAllEvents()
+        content:SetID(0)
+        content:ClearAllPoints()
+        CURRENT_PAGE = CURRENT_PAGE - 1
+        History_Pagination:SetText(CURRENT_PAGE .. "/" .. TOTAL_PAGE_SIZE)
+
+        showPage(CURRENT_PAGE)
+    end
+end
+
+function showPage(number)
+    if (CURRENT_PAGE > 1) then
+        previousButton:Enable()
+    else
+        previousButton:Disable()
+    end
+
+    if (CURRENT_PAGE + 1 <= TOTAL_PAGE_SIZE) then
+        nextButton:Enable()
+    else
+        nextButton:Disable()
+    end
+
+    content = CreateFrame("Frame", nil, History)
+    content:SetSize(128, 128)
+    local texture = content:CreateTexture()
+    texture:SetAllPoints()
+
+    CURRENT_PAGE = number
+    local offset = 0
+
+    local END = ((15 - (CURRENT_PAGE * 15)) * -1) + 15
+    if (((15 - (CURRENT_PAGE * 15)) * -1) + 16 >= table.getn(SavesSorted)) then
+        END = table.getn(SavesSorted)
+    end
+
+    --print("END is " .. END .. "(" .. table.getn(SavesSorted) .. ")")
+    for k = ((15 - (CURRENT_PAGE * 15)) * -1) + 1, END, 1 do
+        offset = offset - 20
+        local dateString = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        dateString:SetPoint("TOPLEFT", History, 0, offset)
+
+        local day = string.sub(SavesSorted[k], 0, 2)
+        local month = string.sub(SavesSorted[k], 3, 4)
+        local year = string.sub(SavesSorted[k], 5, 6)
+        if (CURRENT_DATE == day .. month .. year) then
+            dateString:SetText("Today")
+        else
+            dateString:SetText(day .. "." .. month .. "." .. year)
+        end
+        dateString:SetTextColor(1, 1, 1, 1)
+
+        local money = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        money:SetPoint("TOPRIGHT", History, -10, offset)
+        money:SetFont("Fonts\\FRIZQT__.TTF", 10)
+
+        money:SetText(GetCoinTextureString(SAVES[SavesSorted[k]]))
+    end
+end
+
+function dateSort(dateTable)
+    local i = 1
+    local changed = false
+
+    table.foreach(
+        dateTable,
+        function(k, v)
+            local day = string.sub(dateTable[k], 0, 2)
+            local month = string.sub(dateTable[k], 3, 4)
+            local year = string.sub(dateTable[k], 5, 6)
+
+            if (i < table.getn(dateTable)) then
+                local nextDay = string.sub(dateTable[k + 1], 0, 2)
+                local nextMonth = string.sub(dateTable[k + 1], 3, 4)
+                local nextYear = string.sub(dateTable[k + 1], 5, 6)
+
+                if (day < nextDay and month <= nextMonth or month < nextMonth) then
+                    changed = true
+
+                    local temp = dateTable[k]
+                    dateTable[k] = dateTable[i + 1]
+                    dateTable[i + 1] = temp
+                end
+            end
+
+            i = i + 1
+        end
+    )
+
+    if (changed) then
+        dateSort(dateTable)
     end
 end

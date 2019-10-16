@@ -1,0 +1,260 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+http://wowprogramming.com/FrameXML/UI.xsd">
+
+    <Frame name ="GoldStat" parent="UIParent" frameStrata="HIGH" enableMouse="true" movable="true">
+        <Size>
+            <AbsDimension x="200" y="28"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="UIParent"/>
+        </Anchors>
+
+
+        <Frames>
+            <Button name="ShowDetailsButton" hidden="false">
+                <Size>
+                    <AbsDimension x="20" y="40" />
+                </Size>
+                <Anchors>
+                    <Anchor point="RIGHT" x="0" y="18"/>
+                </Anchors>
+                <NormalTexture file="Interface\Buttons\UI-MicroButton-EJ-Up"/>
+                <PushedTexture file="Interface\Buttons\UI-MicroButton-EJ-Down"/>
+                <HighlightTexture file="Interface\Buttons\UI-MicroButton-Hilight" alphaMode="ADD"/>
+                <Scripts>
+                    <OnEnter>
+                    GameTooltip:SetOwner(self,"ANCHOR_TOPRIGHT")
+                    GameTooltip:SetText("Show History")
+                    GameTooltip:Show()
+                    </OnEnter>
+
+                    <OnLeave>
+                    GameTooltip:Hide()
+                    </OnLeave>
+                    <OnClick>
+                        Main:Show();
+                    </OnClick>
+                </Scripts>
+            </Button>
+
+        </Frames>
+        <Scripts>
+
+            <OnLoad>
+         MakeMovable(self)
+            </OnLoad>
+        </Scripts>
+        <Layers>
+            <Layer level="BORDER">
+
+                <Texture file="Interface\DialogFrame\UI-DialogBox-Header" alpha="1">
+                    <Size>
+                        <AbsDimension x="300" y="60"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="CENTER"/>
+                    </Anchors>
+                </Texture>
+
+            </Layer>
+
+            <Layer level="OVERLAY">
+                <FontString name="liveGold" inherits="GameFontNormal">
+                    <Size>
+                        <AbsDimension x="120" y="20"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="LEFT">
+                            <Offset x="35" y="10"/>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+
+        </Layers>
+        <Scripts>
+            <OnEnter>
+                    GameTooltip:SetOwner(self,"ANCHOR_TOPRIGHT")
+                    GameTooltip:SetText("Your Daily Balance")
+                    GameTooltip:Show()
+            </OnEnter>
+
+            <OnLeave>
+                    GameTooltip:Hide()
+            </OnLeave>
+
+        </Scripts>
+    </Frame>
+
+
+    <Frame name="Main" parent="UIParent" frameStrata="HIGH" enableMouse="true" movable="true">
+        <Size x="205" y="512"/>
+        <Anchors>
+            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="UIParent"/>
+        </Anchors>
+
+        <Frames>
+
+            <Frame name="History" parent="Main">
+                <Size x="300" y="325"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="Main">
+                        <Offset x="-115" y="-75"/>
+                    </Anchor>
+                </Anchors>
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <FontString name="History_Title" parentKey="History_title" inherits="GameFontNormal">
+                            <Color r="1" g="1" b="1" a="1"/>
+                            <Anchors>
+                                <Anchor point="TOP">
+                                    <Offset x="-60" y="20"/>
+                                </Anchor>
+                            </Anchors>
+
+
+                        </FontString>
+
+                        <FontString name="History_Pagination" parentKey="History_title" inherits="GameFontNormal">
+                            <Color r="1" g="1" b="1" a="1"/>
+                            <Anchors>
+                                <Anchor point="BOTTOM">
+                                    <Offset x="5" y="-24"/>
+                                </Anchor>
+                            </Anchors>
+
+
+                        </FontString>
+
+
+                    </Layer>
+                </Layers>
+                <Scripts>
+                    <OnShow>
+                    loadHistory()
+                    </OnShow>
+                </Scripts>
+
+            </Frame>
+            <Button name="$parentCloseButton" parentKey="CloseButton" inherits="UIPanelCloseButton">
+                <Anchors>
+                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" x="0" y="-8"/>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        closeMainFrame()
+                    </OnClick>
+                </Scripts>
+            </Button>
+
+
+            <Button name="previousButton" inherits="UIPanelButtonTemplate" text="PREVIOUS">
+                <Size x="109" y="22"/>
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT" x="-127" y="83"/>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                    previousPage()
+                    </OnClick>
+                </Scripts>
+            </Button>
+
+
+            <Button name="nextButton" inherits="UIPanelButtonTemplate" text="NEXT">
+                <Size x="100" y="22"/>
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT" x="95" y="83"/>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                    nextPage()
+                    </OnClick>
+                </Scripts>
+            </Button>
+
+            <Button name="saveButton" inherits="UIPanelButtonTemplate" text="BACK">
+                <Size x="100" y="22"/>
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT" x="95" y="83"/>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                showHistory()
+                    </OnClick>
+                    <OnLoad>
+                        self:Hide()
+                    </OnLoad>
+                </Scripts>
+            </Button>
+
+
+
+            <Button name="Options" inherits="TabButtonTemplate" text="Options" id="1">
+
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT" x="88" y="440"/>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                    PanelTemplates_TabResize(self, 35);
+                    _G[self:GetName().."HighlightTexture"]:SetWidth(self:GetTextWidth() + 31);
+                    </OnLoad>
+                    <OnClick>
+                    showOptions()
+                    </OnClick>
+                </Scripts>
+            </Button>
+        </Frames>
+
+
+
+        <Layers>
+            <Layer level="BORDER">
+
+                <Texture file="Interface\LFGFRAME\UI-FRAME-THREEBUTTON-BLANK">
+                    <Anchors>
+                        <Anchor point="CENTER"/>
+                    </Anchors>
+                </Texture>
+
+            </Layer>
+            <Layer level="BACKGROUND">
+
+                <Texture name="$parent_Portrait" parentKey="portrait" file="Interface\ICONS\INV_Misc_Book_12">
+                    <Size x="65" y="65"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT">
+                            <Offset x="-144" y="-4"/>
+                        </Anchor>
+                    </Anchors>
+                </Texture>
+
+
+
+
+            </Layer>
+            <Layer level="OVERLAY">
+                <FontString name="$parent_Title" parentKey="title" inherits="GameFontNormal" text="Classic Gold Tracker">
+                    <Anchors>
+                        <Anchor point="TOP">
+                            <Offset x="-60" y="-18"/>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+
+
+        <Scripts>
+            <OnLoad>
+            CGT_OnLoad(self)
+            self:Hide()
+            </OnLoad>
+        </Scripts>
+
+    </Frame>
+
+
+</Ui>

@@ -6,3 +6,4 @@
 
 
 ClassicGoldTracker.lua
+ClassicGoldTracker.xml
