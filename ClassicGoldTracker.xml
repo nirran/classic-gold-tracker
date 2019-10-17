@@ -281,27 +281,28 @@ http://wowprogramming.com/FrameXML/UI.xsd">
             </Button>
 
 
-            <Button name="CGT_previousButton" inherits="UIPanelButtonTemplate" text="PREVIOUS">
+            <Button name="CGT_nextButton" inherits="UIPanelButtonTemplate" text="PREVIOUS">
                 <Size x="109" y="22"/>
                 <Anchors>
                     <Anchor point="BOTTOMLEFT" x="-127" y="83"/>
                 </Anchors>
                 <Scripts>
                     <OnClick>
-                    previousPage()
+                     nextPage()
+                   
                     </OnClick>
                 </Scripts>
             </Button>
 
 
-            <Button name="CGT_nextButton" inherits="UIPanelButtonTemplate" text="NEXT">
+            <Button name="CGT_previousButton" inherits="UIPanelButtonTemplate" text="NEXT">
                 <Size x="100" y="22"/>
                 <Anchors>
                     <Anchor point="BOTTOMLEFT" x="95" y="83"/>
                 </Anchors>
                 <Scripts>
                     <OnClick>
-                    nextPage()
+                    previousPage()
                     </OnClick>
                 </Scripts>
             </Button>

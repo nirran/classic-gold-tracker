@@ -193,7 +193,6 @@ function loadHistory()
         end
     end
 
-    History_Pagination:SetText(CURRENT_PAGE .. "/" .. TOTAL_PAGE_SIZE)
     showPage(CURRENT_PAGE)
 end
 
@@ -205,7 +204,6 @@ function nextPage()
         cgt_content:SetID(0)
         cgt_content:ClearAllPoints()
         CURRENT_PAGE = CURRENT_PAGE + 1
-        History_Pagination:SetText(CURRENT_PAGE .. "/" .. TOTAL_PAGE_SIZE)
 
         showPage(CURRENT_PAGE)
     end
@@ -219,13 +217,14 @@ function previousPage()
         cgt_content:SetID(0)
         cgt_content:ClearAllPoints()
         CURRENT_PAGE = CURRENT_PAGE - 1
-        History_Pagination:SetText(CURRENT_PAGE .. "/" .. TOTAL_PAGE_SIZE)
 
         showPage(CURRENT_PAGE)
     end
 end
 
 function showPage(number)
+    History_Pagination:SetText((TOTAL_PAGE_SIZE - CURRENT_PAGE) + 1 .. "/" .. TOTAL_PAGE_SIZE)
+
     if (CURRENT_PAGE > 1) then
         CGT_previousButton:Enable()
     else
