@@ -4,7 +4,7 @@ local PLAYER_MONEY_CURRENT = 0
 local CURRENT_DATE = date("%d%m%y")
 local CURRENT_PAGE = 1
 local SavesSorted = {}
-local content
+local cgt_content
 local SavesSortedSize, SavesSortedSizeFinal
 
 function CGT_OnLoad(self)
@@ -105,7 +105,7 @@ function getGoldString(value)
         return parsed
     end
 
-    if (value < 1000) then
+    if (value < 10000) then
         local parsed = (("%ds %dc"):format((value / 100) % 100, value % 100))
 
         return parsed
@@ -124,16 +124,16 @@ function MakeMovable(frame)
 end
 
 function showOptions()
-    content:Hide()
-    content:SetParent(nil)
-    content:UnregisterAllEvents()
-    content:SetID(0)
-    content:ClearAllPoints()
+    cgt_content:Hide()
+    cgt_content:SetParent(nil)
+    cgt_content:UnregisterAllEvents()
+    cgt_content:SetID(0)
+    cgt_content:ClearAllPoints()
     optionsShown = true
     History_Title:SetText("Options")
     History:Hide()
-    previousButton:Hide()
-    nextButton:Hide()
+    CGT_previousButton:Hide()
+    CGT_nextButton:Hide()
     saveButton:Show()
 
     Options:Show()
@@ -143,18 +143,18 @@ function showHistory()
     History_Title:SetText("Gold History")
     History:Show()
     optionsShown = false
-    previousButton:Show()
-    nextButton:Show()
+    CGT_previousButton:Show()
+    CGT_nextButton:Show()
     saveButton:Hide()
     Options:Hide()
 end
 
 function closeMainFrame()
-    content:Hide()
-    content:SetParent(nil)
-    content:UnregisterAllEvents()
-    content:SetID(0)
-    content:ClearAllPoints()
+    cgt_content:Hide()
+    cgt_content:SetParent(nil)
+    cgt_content:UnregisterAllEvents()
+    cgt_content:SetID(0)
+    cgt_content:ClearAllPoints()
     History_Title:SetText("Gold History")
     Main:Hide()
     showHistory()
@@ -162,6 +162,11 @@ end
 
 function loadHistory()
     SavesSorted = {}
+
+    if SAVES == nil then
+        -- No Saves for this character found
+        SAVES = {}
+    end
 
     for k in pairs(SAVES) do
         table.insert(SavesSorted, k)
@@ -180,9 +185,12 @@ function loadHistory()
     until (SavesSortedSize <= 0)
 
     if (CURRENT_PAGE > 1) then
-        previousButton:Enable()
+        CGT_previousButton:Enable()
     else
-        previousButton:Disable()
+        if (CGT_previousButton == nil) then
+        else
+            CGT_previousButton:Disable()
+        end
     end
 
     History_Pagination:SetText(CURRENT_PAGE .. "/" .. TOTAL_PAGE_SIZE)
@@ -191,11 +199,11 @@ end
 
 function nextPage()
     if (CURRENT_PAGE + 1 <= TOTAL_PAGE_SIZE) then
-        content:Hide()
-        content:SetParent(nil)
-        content:UnregisterAllEvents()
-        content:SetID(0)
-        content:ClearAllPoints()
+        cgt_content:Hide()
+        cgt_content:SetParent(nil)
+        cgt_content:UnregisterAllEvents()
+        cgt_content:SetID(0)
+        cgt_content:ClearAllPoints()
         CURRENT_PAGE = CURRENT_PAGE + 1
         History_Pagination:SetText(CURRENT_PAGE .. "/" .. TOTAL_PAGE_SIZE)
 
@@ -205,11 +213,11 @@ end
 
 function previousPage()
     if (CURRENT_PAGE - 1 >= 1) then
-        content:Hide()
-        content:SetParent(nil)
-        content:UnregisterAllEvents()
-        content:SetID(0)
-        content:ClearAllPoints()
+        cgt_content:Hide()
+        cgt_content:SetParent(nil)
+        cgt_content:UnregisterAllEvents()
+        cgt_content:SetID(0)
+        cgt_content:ClearAllPoints()
         CURRENT_PAGE = CURRENT_PAGE - 1
         History_Pagination:SetText(CURRENT_PAGE .. "/" .. TOTAL_PAGE_SIZE)
 
@@ -219,20 +227,26 @@ end
 
 function showPage(number)
     if (CURRENT_PAGE > 1) then
-        previousButton:Enable()
+        CGT_previousButton:Enable()
     else
-        previousButton:Disable()
+        if (CGT_previousButton == nil) then
+        else
+            CGT_previousButton:Disable()
+        end
     end
 
     if (CURRENT_PAGE + 1 <= TOTAL_PAGE_SIZE) then
-        nextButton:Enable()
+        CGT_nextButton:Enable()
     else
-        nextButton:Disable()
+        if (CGT_nextButton == nil) then
+        else
+            CGT_nextButton:Disable()
+        end
     end
 
-    content = CreateFrame("Frame", nil, History)
-    content:SetSize(128, 128)
-    local texture = content:CreateTexture()
+    cgt_content = CreateFrame("Frame", "CGT_cgt_contentFrame", History)
+    cgt_content:SetSize(128, 128)
+    local texture = cgt_content:CreateTexture()
     texture:SetAllPoints()
 
     CURRENT_PAGE = number
@@ -243,21 +257,21 @@ function showPage(number)
         END = table.getn(SavesSorted)
     end
 
-    local dateHeader = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local dateHeader = cgt_content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     dateHeader:SetPoint("TOPLEFT", History, 7, -5)
     dateHeader:SetText("Date")
 
-    local PercentHeader = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local PercentHeader = cgt_content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     PercentHeader:SetPoint("TOP", History, -5, -5)
     PercentHeader:SetText("Change %")
 
-    local GoldHeader = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local GoldHeader = cgt_content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     GoldHeader:SetPoint("TOPRIGHT", History, -15, -5)
     GoldHeader:SetText("Gold Amount")
 
     for k = ((15 - (CURRENT_PAGE * 15)) * -1) + 1, END, 1 do
         offset = offset - 20
-        local dateString = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        local dateString = cgt_content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         dateString:SetPoint("TOPLEFT", History, 0, offset)
 
         local day = string.sub(SavesSorted[k], 0, 2)
@@ -270,7 +284,7 @@ function showPage(number)
         end
         dateString:SetTextColor(1, 1, 1, 1)
 
-        local money = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        local money = cgt_content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         money:SetPoint("TOPRIGHT", History, -10, offset)
         money:SetFont("Fonts\\FRIZQT__.TTF", 10)
 
@@ -289,7 +303,7 @@ function showPage(number)
         end
 
         if (k < SavesSortedSizeFinal) then
-            local diffInPercent = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            local diffInPercent = cgt_content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
             diffInPercent:SetPoint("TOP", History, -10, offset)
             diffInPercent:SetFont("Fonts\\FRIZQT__.TTF", 10)
 
@@ -320,7 +334,7 @@ function showPage(number)
                 end
             end
         else
-            local diffInPercent = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            local diffInPercent = cgt_content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
             diffInPercent:SetPoint("TOP", History, -10, offset)
             diffInPercent:SetFont("Fonts\\FRIZQT__.TTF", 10)
             diffInPercent:SetText("--")
