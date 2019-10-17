@@ -310,7 +310,13 @@ function showPage(number)
             diffInPercent:SetPoint("TOP", History, -10, offset)
             diffInPercent:SetFont("Fonts\\FRIZQT__.TTF", 10)
 
-            local diff = SAVES[SavesSorted[k]] - SAVES[SavesSorted[k + 1]]
+            local diff
+            if (k == 1) then
+                diff = GetMoney() - SAVES[SavesSorted[k + 1]]
+            else
+                diff = SAVES[SavesSorted[k]] - SAVES[SavesSorted[k + 1]]
+            end
+
             local isNegative = false
             if (diff < 0) then
                 isNegative = true
