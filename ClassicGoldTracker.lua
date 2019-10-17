@@ -29,8 +29,16 @@ function CGT_OnLoad(self)
                     -- No Saves for this character found
                     MYOPTIONS = {}
                     backgroundCheckOption:SetChecked(true)
+                    GoldDisplayOptionIcon:SetChecked(true)
                 else
                     backgroundCheckOption:SetChecked(MYOPTIONS["backgroundLive"])
+                    if (MYOPTIONS["DisplayFormat"] == true) then
+                        GoldDisplayOptionIcon:SetChecked(true)
+                        GoldDisplayOptionText:SetChecked(false)
+                    else
+                        GoldDisplayOptionIcon:SetChecked(false)
+                        GoldDisplayOptionText:SetChecked(true)
+                    end
                 end
 
                 if (backgroundCheckOption:GetChecked() == true) then
@@ -71,19 +79,41 @@ function updateMoneyOnScreen(event)
 
     local overallDiffString = ""
     if overallDiff > 0 then
-        overallDiffString = "+" .. GetCoinTextureString(overallDiff)
+        if (GoldDisplayOptionIcon:GetChecked() == true) then
+            overallDiffString = "+" .. GetCoinTextureString(overallDiff)
+        else
+            overallDiffString = "+" .. getGoldString(overallDiff)
+        end
     else
-        overallDiffString = "-" .. GetCoinTextureString(math.abs(overallDiff))
+        if (GoldDisplayOptionIcon:GetChecked() == true) then
+            overallDiffString = "-" .. GetCoinTextureString(math.abs(overallDiff))
+        else
+            overallDiffString = "-" .. getGoldString(math.abs(overallDiff))
+        end
     end
     if overallDiff == 0 then
         overallDiffString = "" .. GetCoinTextureString(math.abs(overallDiff))
     end
 
     liveGold:SetText(overallDiffString)
+end
 
-    if (event == "PLAYER_ENTERING_WORLD") then
-        local output = "Your Money: " .. GetCoinTextureString(PLAYER_MONEY_CURRENT) .. " (" .. overallDiffString .. ")"
+function getGoldString(value)
+    if (value < 100) then
+        local parsed = (("%dc"):format(value % 100))
+
+        return parsed
     end
+
+    if (value < 1000) then
+        local parsed = (("%ds %dc"):format((value / 100) % 100, value % 100))
+
+        return parsed
+    end
+
+    local parsed = (("%dg %ds %dc"):format(value / 100 / 100, (value / 100) % 100, value % 100))
+
+    return parsed
 end
 
 function MakeMovable(frame)
@@ -225,7 +255,6 @@ function showPage(number)
     GoldHeader:SetPoint("TOPRIGHT", History, -15, -5)
     GoldHeader:SetText("Gold Amount")
 
-    --print("END is " .. END .. "(" .. table.getn(SavesSorted) .. ")")
     for k = ((15 - (CURRENT_PAGE * 15)) * -1) + 1, END, 1 do
         offset = offset - 20
         local dateString = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -246,11 +275,17 @@ function showPage(number)
         money:SetFont("Fonts\\FRIZQT__.TTF", 10)
 
         if (CURRENT_DATE == day .. month .. year) then
-            money:SetText(GetCoinTextureString(GetMoney()))
-            SAVES[SavesSorted[k]] = GetMoney()
-            SAVES[CURRENT_DATE] = GetMoney()
+            if (GoldDisplayOptionIcon:GetChecked() == true) then
+                money:SetText(GetCoinTextureString(GetMoney()))
+            else
+                money:SetText(getGoldString(GetMoney()))
+            end
         else
-            money:SetText(GetCoinTextureString(SAVES[SavesSorted[k]]))
+            if (GoldDisplayOptionIcon:GetChecked() == true) then
+                money:SetText(GetCoinTextureString(SAVES[SavesSorted[k]]))
+            else
+                money:SetText(getGoldString(SAVES[SavesSorted[k]]))
+            end
         end
 
         if (k < SavesSortedSizeFinal) then
@@ -274,9 +309,9 @@ function showPage(number)
                     diffInPercent:SetTextColor(1, 0, 0, 1)
                 end
 
-                diffInPercent:SetText("-" .. math.floor(diffPercent) .. "%")
+                diffInPercent:SetText("-" .. math.ceil(diffPercent) .. "%")
             else
-                diffInPercent:SetText("+" .. math.floor(diffPercent) .. "%")
+                diffInPercent:SetText("+" .. math.ceil(diffPercent) .. "%")
 
                 if (diffPercent <= 25) then
                     diffInPercent:SetTextColor(0, 1, 0, 0.5)
@@ -336,4 +371,17 @@ function toggleBackgroundOption()
     end
 
     MYOPTIONS["backgroundLive"] = backgroundCheckOption:GetChecked()
+end
+
+function checkDisplayFormat(num)
+    if (num == 1) then
+        GoldDisplayOptionIcon:SetChecked(true)
+        GoldDisplayOptionText:SetChecked(false)
+    else
+        GoldDisplayOptionIcon:SetChecked(false)
+        GoldDisplayOptionText:SetChecked(true)
+    end
+
+    updateMoneyOnScreen(nil)
+    MYOPTIONS["DisplayFormat"] = GoldDisplayOptionIcon:GetChecked()
 end

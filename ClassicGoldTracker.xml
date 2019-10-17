@@ -38,6 +38,8 @@ http://wowprogramming.com/FrameXML/UI.xsd">
                 </Scripts>
             </Button>
 
+
+
         </Frames>
         <Scripts>
 
@@ -116,11 +118,44 @@ http://wowprogramming.com/FrameXML/UI.xsd">
 
                         </FontString>
 
-                        <FontString name="Options_Title2" inherits="GameFontNormal" text="Background in Live Tracker">
+                        <FontString name="Options_Title2" inherits="GameFontNormal" text="Opaque Background">
                             <Color r="1" g="1" b="1" a="1"/>
                             <Anchors>
                                 <Anchor point="TOP">
-                                    <Offset x="-60" y="-20"/>
+                                    <Offset x="-82" y="-20"/>
+                                </Anchor>
+                            </Anchors>
+
+
+                        </FontString>
+
+                        <FontString name="Options_Title3" inherits="GameFontNormal" text="Display Format">
+                            <Color r="1" g="1" b="1" a="1"/>
+                            <Anchors>
+                                <Anchor point="TOP">
+                                    <Offset x="-98" y="-50"/>
+                                </Anchor>
+                            </Anchors>
+
+
+                        </FontString>
+
+                        <FontString name="Options_Title3_1" inherits="GameFontNormalSmall" text="Icon">
+                            <Color r="1" g="1" b="0" a="1"/>
+                            <Anchors>
+                                <Anchor point="TOP">
+                                    <Offset x="15" y="-52"/>
+                                </Anchor>
+                            </Anchors>
+
+
+                        </FontString>
+
+                        <FontString name="Options_Title3_2" inherits="GameFontNormalSmall" text="Text">
+                            <Color r="1" g="1" b="0" a="1"/>
+                            <Anchors>
+                                <Anchor point="TOP">
+                                    <Offset x="100" y="-52"/>
                                 </Anchor>
                             </Anchors>
 
@@ -152,6 +187,34 @@ http://wowprogramming.com/FrameXML/UI.xsd">
                             </OnClick>
                         </Scripts>
                     </CheckButton>
+
+                    <CheckButton name="GoldDisplayOptionIcon" inherits="UIRadioButtonTemplate" checked="true">
+                        <Anchors>
+                            <Anchor point="TOPRIGHT">
+                                <Offset x="-150" y="-50" />
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnClick>
+                                checkDisplayFormat(1)
+                            </OnClick>
+                        </Scripts>
+                    </CheckButton>
+
+                    <CheckButton name="GoldDisplayOptionText" inherits="UIRadioButtonTemplate" checked="false">
+                        <Anchors>
+                            <Anchor point="TOPRIGHT">
+                                <Offset x="-70" y="-50" />
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnClick>
+                            checkDisplayFormat(2)
+                            </OnClick>
+                        </Scripts>
+                    </CheckButton>
+
+
                 </Frames>
 
             </Frame>
