@@ -1,4 +1,4 @@
-## Interface: 80200
+## Interface: 80205
 ## Title: Classic Gold Tracker
 ## Notes: Tracks your gold income by days
 ## SavedVariablesPerCharacter: SAVES
