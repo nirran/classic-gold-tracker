@@ -92,7 +92,11 @@ function updateMoneyOnScreen(event)
         end
     end
     if overallDiff == 0 then
-        overallDiffString = "" .. GetCoinTextureString(math.abs(overallDiff))
+        if (GoldDisplayOptionIcon:GetChecked() == true) then
+            overallDiffString = GetCoinTextureString(math.abs(overallDiff))
+        else
+            overallDiffString = getGoldString(math.abs(overallDiff))
+        end
     end
 
     liveGold:SetText(overallDiffString)
