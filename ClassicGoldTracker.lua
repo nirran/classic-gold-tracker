@@ -29,7 +29,16 @@ function CGT_OnLoad(self)
                     -- No Saves for this character found
                     MYOPTIONS = {}
                     backgroundCheckOption:SetChecked(true)
+					
                     GoldDisplayOptionIcon:SetChecked(true)
+					
+					NumberFormatPercent:SetChecked(true)
+					
+					NumberFormatAmount:SetChecked(false)
+					
+					GoldOnly:SetChecked(false)
+					
+					coloredtext:SetChecked(true)
                 else
                     backgroundCheckOption:SetChecked(MYOPTIONS["backgroundLive"])
                     if (MYOPTIONS["DisplayFormat"] == true) then
@@ -39,6 +48,29 @@ function CGT_OnLoad(self)
                         GoldDisplayOptionIcon:SetChecked(false)
                         GoldDisplayOptionText:SetChecked(true)
                     end
+
+                    NumberFormatPercent:SetChecked(MYOPTIONS["NumberFormat"])
+                    if (MYOPTIONS["NumberFormat"] == true) then
+						NumberFormatPercent:SetChecked(true)
+						NumberFormatAmount:SetChecked(false)
+					else
+						NumberFormatPercent:SetChecked(false)
+						NumberFormatAmount:SetChecked(true)
+					end
+
+                    GoldOnly:SetChecked(MYOPTIONS["GoldOnly"])
+                    if (MYOPTIONS["GoldOnly"] == true) then
+						GoldOnly:SetChecked(true)
+					else
+						GoldOnly:SetChecked(false)
+					end
+	
+                    coloredtext:SetChecked(MYOPTIONS["ColoredText"])
+                    if (MYOPTIONS["ColoredText"] == true) then
+						coloredtext:SetChecked(true)
+					else
+						coloredtext:SetChecked(false)
+					end
                 end
 
                 if (backgroundCheckOption:GetChecked() == true) then
@@ -53,6 +85,7 @@ function CGT_OnLoad(self)
             end
         end
     )
+
 end
 
 function updateMoneyOnScreen(event)
@@ -80,20 +113,20 @@ function updateMoneyOnScreen(event)
     local overallDiffString = ""
     if overallDiff > 0 then
         if (GoldDisplayOptionIcon:GetChecked() == true) then
-            overallDiffString = "+" .. GetCoinTextureString(overallDiff)
+            overallDiffString = "|c0000FF00" .. "++" .. GetGoldTextureString(overallDiff)
         else
-            overallDiffString = "+" .. getGoldString(overallDiff)
+            overallDiffString = "|c0000FF00" .. "++" .. getGoldString(overallDiff)
         end
     else
         if (GoldDisplayOptionIcon:GetChecked() == true) then
-            overallDiffString = "-" .. GetCoinTextureString(math.abs(overallDiff))
+            overallDiffString = "|c00FF0000" .. "--" .. GetGoldTextureString(math.abs(overallDiff))
         else
-            overallDiffString = "-" .. getGoldString(math.abs(overallDiff))
+            overallDiffString = "|c00FF0000" .. "--" .. getGoldString(math.abs(overallDiff))
         end
     end
     if overallDiff == 0 then
         if (GoldDisplayOptionIcon:GetChecked() == true) then
-            overallDiffString = GetCoinTextureString(math.abs(overallDiff))
+            overallDiffString = GetGoldTextureString(math.abs(overallDiff))
         else
             overallDiffString = getGoldString(math.abs(overallDiff))
         end
@@ -102,22 +135,83 @@ function updateMoneyOnScreen(event)
     liveGold:SetText(overallDiffString)
 end
 
+function GetGoldPercent(value)
+	local trunc = string.sub(tonumber(value),0 , 5)
+	--print("trunc " .. trunc)
+	return trunc .. "%"
+end
+	
+
 function getGoldString(value)
-    if (value < 100) then
-        local parsed = (("%dc"):format(value % 100))
 
-        return parsed
-    end
+    local copper, silver, gold, calc, gc, sc, cc
 
-    if (value < 10000) then
-        local parsed = (("%ds %dc"):format((value / 100) % 100, value % 100))
+	gc = "|cFFFFFF00"
+	
+	sc = "|cFFCCCCCC"
+	
+	cc = "|cFFFF6600"
 
-        return parsed
-    end
+	copper = (("%d"):format(value % 100))
 
-    local parsed = (("%dg %ds %dc"):format(value / 100 / 100, (value / 100) % 100, value % 100))
+	silver = (("%d"):format((value / 100) % 100))
+	
+	gold = (("%d"):format(value / 100 / 100))
 
-    return parsed
+	calc = FormatLargeNumber(gold)
+
+	if (GoldOnly:GetChecked()) then
+		if (coloredtext:GetChecked()) then
+			return (gc..calc..gc.."g")
+		else 
+			return (calc.."g")
+		end
+	else
+		if (coloredtext:GetChecked()) then
+			return (gc..calc..gc.."g "..sc..silver..sc.."s "..cc..copper..cc.."c")
+		else 
+			return (calc.."g "..silver.."s "..copper.."c")
+		end
+	end
+end
+
+function GetGoldTextureString(value)
+
+    local copper, silver, gold, calc, ccoin, scoin, gcoin, gc, sc, cc
+
+	gc = "|cFFFFFF00"
+	
+	sc = "|cFFCCCCCC"
+	
+	cc = "|cFFFF6600"
+
+	copper = (("%d"):format(value % 100))
+
+	silver = (("%d"):format((value / 100) % 100))
+	
+	gold = (("%d"):format(value / 100 / 100))
+
+	calc = FormatLargeNumber(gold)
+
+	ccoin = "|TInterface\\MoneyFrame\\UI-CopperIcon:0:0:2:0|t "
+	
+	scoin = "|TInterface\\MoneyFrame\\UI-SilverIcon:0:0:2:0|t "
+	
+	gcoin = "|TInterface\\MoneyFrame\\UI-GoldIcon:0:0:2:0|t "
+		
+	if (GoldOnly:GetChecked()) then
+		if (coloredtext:GetChecked()) then
+			return (gc..calc..gc..gcoin)
+		else 
+			return (calc..gcoin)
+		end
+	else
+		if (coloredtext:GetChecked()) then
+			return (gc..calc..gc..gcoin..sc..silver..sc..scoin..cc..copper..cc..ccoin)
+		else 
+			return (calc..gcoin..silver..scoin..copper..ccoin)
+		end
+	end
 end
 
 function MakeMovable(frame)
@@ -182,6 +276,7 @@ function loadHistory()
     SavesSortedSizeFinal = table.getn(SavesSorted)
     SavesSortedSize = table.getn(SavesSorted)
 
+	--print("SavesSortedSizeFinal " .. SavesSortedSizeFinal .. " SavesSortedSize " .. SavesSortedSize) 
     TOTAL_PAGE_SIZE = 0
     repeat
         TOTAL_PAGE_SIZE = TOTAL_PAGE_SIZE + 1
@@ -196,24 +291,13 @@ function loadHistory()
             CGT_previousButton:Disable()
         end
     end
-
+	
+	--print(" CURRENT_PAGE " .. CURRENT_PAGE)
     showPage(CURRENT_PAGE)
 end
 
 function nextPage()
-    if (CURRENT_PAGE + 1 <= TOTAL_PAGE_SIZE) then
-        cgt_content:Hide()
-        cgt_content:SetParent(nil)
-        cgt_content:UnregisterAllEvents()
-        cgt_content:SetID(0)
-        cgt_content:ClearAllPoints()
-        CURRENT_PAGE = CURRENT_PAGE + 1
 
-        showPage(CURRENT_PAGE)
-    end
-end
-
-function previousPage()
     if (CURRENT_PAGE - 1 >= 1) then
         cgt_content:Hide()
         cgt_content:SetParent(nil)
@@ -224,12 +308,28 @@ function previousPage()
 
         showPage(CURRENT_PAGE)
     end
+
+end
+
+function previousPage()
+
+    if (CURRENT_PAGE + 1 <= TOTAL_PAGE_SIZE) then
+        cgt_content:Hide()
+        cgt_content:SetParent(nil)
+        cgt_content:UnregisterAllEvents()
+        cgt_content:SetID(0)
+        cgt_content:ClearAllPoints()
+        CURRENT_PAGE = CURRENT_PAGE + 1
+
+        showPage(CURRENT_PAGE)
+    end
+
 end
 
 function showPage(number)
-    History_Pagination:SetText((TOTAL_PAGE_SIZE - CURRENT_PAGE) + 1 .. "/" .. TOTAL_PAGE_SIZE)
+    History_Pagination:SetText(CURRENT_PAGE .. "/" .. TOTAL_PAGE_SIZE)
 
-    if (CURRENT_PAGE > 1) then
+    if (CURRENT_PAGE + 1 <= TOTAL_PAGE_SIZE) then
         CGT_previousButton:Enable()
     else
         if (CGT_previousButton == nil) then
@@ -238,7 +338,7 @@ function showPage(number)
         end
     end
 
-    if (CURRENT_PAGE + 1 <= TOTAL_PAGE_SIZE) then
+    if (CURRENT_PAGE > 1) then
         CGT_nextButton:Enable()
     else
         if (CGT_nextButton == nil) then
@@ -265,12 +365,12 @@ function showPage(number)
     dateHeader:SetText("Date")
 
     local PercentHeader = cgt_content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    PercentHeader:SetPoint("TOP", History, -5, -5)
-    PercentHeader:SetText("Change %")
+    PercentHeader:SetPoint("TOP", History, -40, -5)
+    PercentHeader:SetText("Change")
 
     local GoldHeader = cgt_content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     GoldHeader:SetPoint("TOPRIGHT", History, -15, -5)
-    GoldHeader:SetText("Gold Amount")
+    GoldHeader:SetText("Total Gold")
 
     for k = ((15 - (CURRENT_PAGE * 15)) * -1) + 1, END, 1 do
         offset = offset - 20
@@ -293,48 +393,66 @@ function showPage(number)
 
         if (CURRENT_DATE == day .. month .. year) then
             if (GoldDisplayOptionIcon:GetChecked() == true) then
-                money:SetText(GetCoinTextureString(GetMoney()))
+                money:SetText(GetGoldTextureString(GetMoney()))
             else
                 money:SetText(getGoldString(GetMoney()))
             end
         else
             if (GoldDisplayOptionIcon:GetChecked() == true) then
-                money:SetText(GetCoinTextureString(SAVES[SavesSorted[k]]))
+                money:SetText(GetGoldTextureString(SAVES[SavesSorted[k]]))
             else
-                money:SetText(getGoldString(SAVES[SavesSorted[k]]))
+				money:SetText(getGoldString(SAVES[SavesSorted[k]]))
             end
         end
 
         if (k < SavesSortedSizeFinal) then
             local diffInPercent = cgt_content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-            diffInPercent:SetPoint("TOP", History, -10, offset)
+            diffInPercent:SetPoint("TOP", History, -40, offset)
             diffInPercent:SetFont("Fonts\\FRIZQT__.TTF", 10)
 
-            local diff
+            local diff, diffPercent 
             if (k == 1) then
-                diff = GetMoney() - SAVES[SavesSorted[k + 1]]
+                diff = GetMoney() - SAVES[SavesSorted[k]]
             else
+				k = k - 1
+				--print("K " .. k)
                 diff = SAVES[SavesSorted[k]] - SAVES[SavesSorted[k + 1]]
             end
-
+			
             local isNegative = false
             if (diff < 0) then
                 isNegative = true
                 diff = diff * -1
             end
 
-            local diffPercent = diff / SAVES[SavesSorted[k + 1]] * 100
-
+			if (NumberFormatPercent:GetChecked() == true) then 
+				diffPercent = diff / SAVES[SavesSorted[k + 1]] * 100
+			else
+				diffPercent = diff 
+			end
+			
             if (isNegative) then
-                if (diffPercent <= 25) then
+				if (NumberFormatPercent:GetChecked() == true) then
+					diffInPercent:SetText("--" .. GetGoldPercent(diffPercent))
+                elseif (diffPercent <= 25) then
                     diffInPercent:SetTextColor(1, 1, 0, 1)
                 else
                     diffInPercent:SetTextColor(1, 0, 0, 1)
                 end
-
-                diffInPercent:SetText("-" .. math.ceil(diffPercent) .. "%")
+				
+				if (GoldDisplayOptionIcon:GetChecked() == true) then
+					diffInPercent:SetText("--" .. GetGoldTextureString(diffPercent))
+				else
+					diffInPercent:SetText("--" .. getGoldString(diffPercent))
+				end
             else
-                diffInPercent:SetText("+" .. math.ceil(diffPercent) .. "%")
+				if (NumberFormatPercent:GetChecked() == true) then
+					diffInPercent:SetText("++" .. GetGoldPercent(diffPercent))
+                elseif (GoldDisplayOptionIcon:GetChecked() == true) then
+					diffInPercent:SetText("++" .. GetGoldTextureString(diffPercent))
+				else
+					diffInPercent:SetText("++" .. getGoldString(diffPercent))
+				end
 
                 if (diffPercent <= 25) then
                     diffInPercent:SetTextColor(0, 1, 0, 0.5)
@@ -344,7 +462,7 @@ function showPage(number)
             end
         else
             local diffInPercent = cgt_content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-            diffInPercent:SetPoint("TOP", History, -10, offset)
+            diffInPercent:SetPoint("TOP", History, -40, offset)
             diffInPercent:SetFont("Fonts\\FRIZQT__.TTF", 10)
             diffInPercent:SetText("--")
         end
@@ -352,37 +470,19 @@ function showPage(number)
 end
 
 function dateSort(dateTable)
-    local i = 1
-    local changed = false
 
-    table.foreach(
-        dateTable,
-        function(k, v)
-            local day = string.sub(dateTable[k], 0, 2)
-            local month = string.sub(dateTable[k], 3, 4)
-            local year = string.sub(dateTable[k], 5, 6)
-
-            if (i < table.getn(dateTable)) then
-                local nextDay = string.sub(dateTable[k + 1], 0, 2)
-                local nextMonth = string.sub(dateTable[k + 1], 3, 4)
-                local nextYear = string.sub(dateTable[k + 1], 5, 6)
-
-                if (day < nextDay and month <= nextMonth or month < nextMonth) then
-                    changed = true
-
-                    local temp = dateTable[k]
-                    dateTable[k] = dateTable[i + 1]
-                    dateTable[i + 1] = temp
-                end
-            end
-
-            i = i + 1
-        end
-    )
-
-    if (changed) then
-        dateSort(dateTable)
-    end
+    table.sort(dateTable,function(k, v)
+		local day1, month1, year1 = k:match("(%d%d)(%d%d)(%d%d)")
+		local day2, month2, year2 = v:match("(%d%d)(%d%d)(%d%d)")
+		if year1 ~= year2 then
+			return year1 > year2
+		elseif month1 ~= month2 then
+			return month1 > month2
+		elseif day1 ~= day2 then
+			return day1 > day2
+		end
+	end)
+	
 end
 
 function toggleBackgroundOption()
@@ -407,4 +507,29 @@ function checkDisplayFormat(num)
 
     updateMoneyOnScreen(nil)
     MYOPTIONS["DisplayFormat"] = GoldDisplayOptionIcon:GetChecked()
+end
+
+function toggleGoldOnlyOption(value)
+	--print(GoldOnly:GetChecked())
+    updateMoneyOnScreen(nil)
+	MYOPTIONS["GoldOnly"] = GoldOnly:GetChecked()
+end
+
+function toggleColoredTextOption()
+	--print(coloredtext:GetChecked())
+    updateMoneyOnScreen(nil)
+	MYOPTIONS["ColoredText"] = coloredtext:GetChecked()
+end
+
+function NumberFormat(num)
+	--print(NumberFormatPercent:GetChecked())
+    if (num == 1) then
+        NumberFormatPercent:SetChecked(true)
+        NumberFormatAmount:SetChecked(false)
+    else
+        NumberFormatPercent:SetChecked(false)
+        NumberFormatAmount:SetChecked(true)
+    end
+    updateMoneyOnScreen(nil)
+	MYOPTIONS["NumberFormat"] = NumberFormatPercent:GetChecked()
 end
